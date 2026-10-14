@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>루틴 플로우 모바일 — 습관 & 연속 달성 앱</title>
+  <style>
+    :root {
+      --bg-outer: #e2e8f0;
+      --bg-app: #f4f6fb;
+      --bg-card: #ffffff;
+      --bg-subtle: #edf1f8;
+      --bg-active: #e2e8f5;
+      --text-primary: #111827;
+      --text-secondary: #4b5563;
+      --text-muted: #8492a6;
+      --border-color: #e2e8f0;
+      --accent: #4f46e5;
+      --accent-soft: #eef2ff;
+      --success: #10b981;
+      --success-soft: #d1fae5;
+      --warning: #f59e0b;
+      --warning-soft: #fef3c7;
+      --danger: #ef4444;
+      --danger-soft: #fee2e2;
+      --streak: #f97316;
+      --streak-soft: #ffedd5;
+      --shadow-card: 0 2px 10px rgba(15, 23, 42, 0.05);
+      --shadow-nav: 0 -4px 20px rgba(15, 23, 42, 0.08);
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    [data-theme="dark"] {
+      --bg-outer: #020617;
+      --bg-app: #0f172a;
+      --bg-card: #1e293b;
+      --bg-subtle: #283548;
+      --bg-active: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --border-color: #334155;
+      --accent: #6366f1;
+      --accent-soft: rgba(99, 102, 241, 0.18);
+      --success: #10b981;
+      --success-soft: rgba(16, 185, 129, 0.18);
+      --warning: #f59e0b;
+      --warning-soft: rgba(245, 158, 11, 0.18);
+      --danger: #f87171;
+      --danger-soft: rgba(239, 68, 68, 0.18);
+      --streak: #fb923c;
+      --streak-soft: rgba(249, 115, 22, 0.2);
+      --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+      --shadow-nav: 0 -4px 20px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      overflow-x: hidden;
+      background-color: var(--bg-outer);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    /* Smartphone App Container (480px max on PC, 100% full screen on phone) */
+    .app-shell {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100dvh;
+      margin: 0 auto;
+      background-color: var(--bg-app);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.12);
+    }
+
+    @media (max-width: 520px) {
+      body {
+        background-color: var(--bg-app);
+      }
+      .app-shell {
+        max-width: 100%;
+        box-shadow: none;
+      }
+    }
+
+    /* Sticky Top Header */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--bg-card);
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .app-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .app-title-wrap h1 {
+      font-size: 1.08rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .app-title-wrap p {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      margin-top: 1px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      height: 36px;
+      padding: 0 11px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Main Content Padding */
+    .app-content {
+      padding: 14px 14px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Compact 2x2 KPI Summary Grid for Smartphone */
+    .kpi-grid-mobile {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .kpi-mini-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 13px 14px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-card);
+    }
+
+    .kpi-mini-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .kpi-mini-val {
+      font-size: 1.38rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .kpi-mini-sub {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mini-bar {
+      width: 100%;
+      height: 5px;
+      background: var(--bg-subtle);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .mini-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.3s ease;
+    }
+
+    /* Week Navigation Strip */
+    .week-nav-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-card);
+    }
+
+    .week-nav-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .week-range-text {
+      font-size: 0.92rem;
+      font-weight: 800;
+    }
+
+    .week-nav-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .sm-btn {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .sm-btn:active {
+      background: var(--bg-active);
+    }
+
+    /* 7-Day Selector Strip (Fits 100% width with no scroll) */
+    .day-strip-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+
+    .day-pill-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 2px;
+      border-radius: 11px;
+      border: 1.5px solid transparent;
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+
+    .day-pill-btn .d-name {
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .day-pill-btn .d-num {
+      font-size: 0.92rem;
+      font-weight: 800;
+      margin-top: 2px;
+      color: var(--text-primary);
+    }
+
+    .day-pill-btn .d-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      margin-top: 4px;
+      background: transparent;
+    }
+
+    .day-pill-btn.has-progress .d-dot {
+      background: var(--accent);
+    }
+
+    .day-pill-btn.all-done .d-dot {
+      background: var(--success);
+    }
+
+    .day-pill-btn.is-today {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .day-pill-btn.is-selected {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
+    }
+
+    .day-pill-btn.is-selected .d-num {
+      color: #ffffff;
+    }
+
+    .day-pill-btn.is-selected .d-dot {
+      background: #ffffff;
+    }
+
+    /* Tab Panels */
+    .tab-panel {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .tab-panel.active {
+      display: flex;
+    }
+
+    /* Section Card */
+    .mobile-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-card);
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 0.98rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Category Filter Scrollable Pills */
+    .cat-scroll {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+
+    .cat-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-chip {
+      flex-shrink: 0;
+      padding: 7px 13px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .cat-chip.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* TAB 1: Today's Big Touch Cards */
+    .today-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .today-habit-card {
+      background: var(--bg-subtle);
+      border-radius: var(--radius-md);
+      padding: 13px;
+      border: 1.5px solid var(--border-color);
+      transition: all 0.18s ease;
+    }
+
+    .today-habit-card.done {
+      background: var(--success-soft);
+      border-color: var(--success);
+    }
+
+    .today-card-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .big-check-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 2px solid var(--border-color);
+      background: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: transparent;
+      flex-shrink: 0;
+      transition: all 0.18s ease;
+    }
+
+    .today-habit-card.done .big-check-circle {
+      background: var(--success);
+      border-color: var(--success);
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(16, 185, 129, 0.35);
+    }
+
+    .today-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .today-card-title {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      word-break: keep-all;
+    }
+
+    .today-habit-card.done .today-card-title-text {
+      text-decoration: line-through;
+      opacity: 0.78;
+    }
+
+    .today-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+    }
+
+    .cat-tag {
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: var(--bg-card);
+    }
+
+    .streak-badge-inline {
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      background: var(--streak-soft);
+      color: var(--streak);
+    }
+
+    .today-note-input {
+      width: 100%;
+      margin-top: 10px;
+      padding: 9px 11px;
+      font-size: 0.84rem;
+      border-radius: 9px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-family: inherit;
+    }
+
+    /* TAB 2: Mobile Weekly Matrix Cards (Zero Horizontal Scroll!) */
+    .weekly-cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .weekly-habit-card {
+      background: var(--bg-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      border: 1px solid var(--border-color);
+    }
+
+    .wk-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .wk-title-group {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .wk-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+    }
+
+    .wk-name {
+      font-size: 0.94rem;
+      font-weight: 800;
+      line-height: 1.25;
+      word-break: keep-all;
+    }
+
+    .wk-sub {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .wk-streak-box {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .wk-streak-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 4px 9px;
+      border-radius: 99px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      background: var(--bg-card);
+      color: var(--text-secondary);
+    }
+
+    .wk-streak-pill.hot {
+      background: var(--streak-soft);
+      color: var(--streak);
+    }
+
+    /* 7-Day Check Buttons Inside Each Habit Card */
+    .wk-days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .wk-day-btn {
+      height: 48px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+
+    .wk-day-btn .wd-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .wk-day-btn .wd-mark {
+      font-size: 0.9rem;
+      font-weight: 900;
+      margin-top: 2px;
+    }
+
+    .wk-day-btn.is-today:not(.done) {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .wk-day-btn.done {
+      background: var(--success);
+      border-color: var(--success);
+      color: #ffffff;
+    }
+
+    .wk-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    /* Mood & Reflection */
+    .mood-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin: 10px 0 12px;
+    }
+
+    .mood-item-btn {
+      height: 44px;
+      border-radius: 11px;
+      border: 1.5px solid var(--border-color);
+      background: var(--bg-subtle);
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mood-item-btn.selected {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      transform: translateY(-2px);
+    }
+
+    .mobile-textarea {
+      width: 100%;
+      min-height: 84px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      font-size: 0.88rem;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    /* Bar Chart on Mobile */
+    .mobile-bar-chart {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      height: 150px;
+      padding: 16px 8px 6px;
+      background: var(--bg-subtle);
+      border-radius: var(--radius-md);
+      align-items: end;
+    }
+
+    .m-bar-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .m-bar-pct {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .m-bar-track {
+      width: 100%;
+      max-width: 28px;
+      height: 92px;
+      background: var(--bg-card);
+      border-radius: 7px;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      border: 1px solid var(--border-color);
+    }
+
+    .m-bar-fill {
+      width: 100%;
+      background: var(--accent);
+      border-radius: 5px 5px 0 0;
+      transition: height 0.3s ease;
+    }
+
+    .m-bar-fill.full {
+      background: var(--success);
+    }
+
+    .m-bar-day {
+      font-size: 0.74rem;
+      font-weight: 700;
+      margin-top: 6px;
+      color: var(--text-secondary);
+    }
+
+    /* Form Controls for Mobile Add/Manage */
+    .mobile-form-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .field-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+    }
+
+    .field-input {
+      width: 100%;
+      height: 44px;
+      padding: 0 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      font-size: 0.92rem;
+      font-family: inherit;
+    }
+
+    .field-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .primary-full-btn {
+      width: 100%;
+      height: 46px;
+      border-radius: 12px;
+      border: none;
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+
+    .manage-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-radius: 12px;
+      background: var(--bg-subtle);
+      margin-bottom: 8px;
+    }
+
+    .del-btn {
+      padding: 7px 11px;
+      border-radius: 8px;
+      border: none;
+      background: var(--danger-soft);
+      color: var(--danger);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    /* Fixed Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      box-shadow: var(--shadow-nav);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+      z-index: 50;
+    }
+
+    @media (max-width: 520px) {
+      .bottom-nav {
+        max-width: 100%;
+      }
+    }
+
+    .nav-tab-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 6px 4px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+
+    .nav-tab-btn .nav-ico {
+      font-size: 1.22rem;
+      line-height: 1;
+    }
+
+    .nav-tab-btn .nav-txt {
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .nav-tab-btn.active {
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .toast-msg {
+      font-size: 0.78rem;
+      color: var(--success);
+      font-weight: 700;
+      margin-top: 6px;
+      min-height: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top App Header -->
+    <header class="app-header">
+      <div class="app-brand">
+        <div class="app-logo">🔥</div>
+        <div class="app-title-wrap">
+          <h1>루틴 플로우</h1>
+          <p id="headerDateText">2026년 10월 14일 (수)</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="icon-btn" id="todayJumpBtn">오늘</button>
+        <button type="button" class="icon-btn" id="themeBtn" title="다크 모드 전환">🌙</button>
+      </div>
+    </header>
+
+    <main class="app-content">
+      <!-- 2x2 Compact KPI Cards -->
+      <section class="kpi-grid-mobile">
+        <div class="kpi-mini-card">
+          <div class="kpi-mini-top">
+            <span id="kpiSelDayLabel">오늘 달성률</span>
+            <span>🎯</span>
+          </div>
+          <div class="kpi-mini-val" id="kpiSelDayVal">0%</div>
+          <div class="kpi-mini-sub" id="kpiSelDaySub">0 / 0개 완료</div>
+          <div class="mini-bar">
+            <div class="mini-bar-fill" id="kpiSelDayBar" style="width: 0%; background: var(--accent);"></div>
+          </div>
+        </div>
+
+        <div class="kpi-mini-card">
+          <div class="kpi-mini-top">
+            <span>최장 연속(Streak)</span>
+            <span>🔥</span>
+          </div>
+          <div class="kpi-mini-val" id="kpiStreakVal">0일</div>
+          <div class="kpi-mini-sub" id="kpiStreakSub">-</div>
+          <div class="mini-bar">
+            <div class="mini-bar-fill" id="kpiStreakBar" style="width: 0%; background: var(--streak);"></div>
+          </div>
+        </div>
+
+        <div class="kpi-mini-card">
+          <div class="kpi-mini-top">
+            <span>주간 종합 달성</span>
+            <span>📈</span>
+          </div>
+          <div class="kpi-mini-val" id="kpiWeekVal">0%</div>
+          <div class="kpi-mini-sub" id="kpiWeekSub">목표 0회 중 0회</div>
+          <div class="mini-bar">
+            <div class="mini-bar-fill" id="kpiWeekBar" style="width: 0%; background: var(--success);"></div>
+          </div>
+        </div>
+
+        <div class="kpi-mini-card">
+          <div class="kpi-mini-top">
+            <span>주간 목표 완수</span>
+            <span>🏆</span>
+          </div>
+          <div class="kpi-mini-val" id="kpiGoalVal">0/0개</div>
+          <div class="kpi-mini-sub" id="kpiPerfectSub">올클리어 0일</div>
+          <div class="mini-bar">
+            <div class="mini-bar-fill" id="kpiGoalBar" style="width: 0%; background: var(--warning);"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7-Day Date Strip (Always visible for quick day switching) -->
+      <section class="week-nav-card">
+        <div class="week-nav-top">
+          <span class="week-range-text" id="weekRangeText">10.12 (월) ~ 10.18 (일)</span>
+          <div class="week-nav-btns">
+            <button type="button" class="sm-btn" id="prevWeekBtn">◀ 이전 주</button>
+            <button type="button" class="sm-btn" id="nextWeekBtn">다음 주 ▶</button>
+          </div>
+        </div>
+        <div class="day-strip-grid" id="dayStripGrid">
+          <!-- 7 Day Pills -->
+        </div>
+      </section>
+
+      <!-- TAB 1: Today / Selected Day Checklist & Reflection -->
+      <div class="tab-panel active" id="tab-today">
+        <section class="mobile-card">
+          <div class="section-head">
+            <div class="section-title">
+              <span>✅</span>
+              <span id="selectedDayBannerTitle">오늘의 일일 목표 체크</span>
+            </div>
+            <span style="font-size: 0.8rem; font-weight: 800; color: var(--accent);" id="selectedDayCountBadge">0/0 완료</span>
+          </div>
+
+          <div class="cat-scroll" id="catTabsToday">
+            <button type="button" class="cat-chip active" data-cat="전체">전체</button>
+            <button type="button" class="cat-chip" data-cat="건강">건강</button>
+            <button type="button" class="cat-chip" data-cat="자기계발">자기계발</button>
+            <button type="button" class="cat-chip" data-cat="마음챙김">마음챙김</button>
+            <button type="button" class="cat-chip" data-cat="생활습관">생활습관</button>
+            <button type="button" class="cat-chip" data-cat="생산성">생산성</button>
+          </div>
+
+          <div class="today-list" id="todayHabitList">
+            <!-- Dynamic Thumb-Friendly Habit Cards -->
+          </div>
+        </section>
+
+        <section class="mobile-card">
+          <div class="section-head" style="margin-bottom: 6px;">
+            <div class="section-title">📝 오늘의 컨디션 & 한줄 회고</div>
+          </div>
+          <div class="mood-row" id="moodRow">
+            <button type="button" class="mood-item-btn" data-mood="🤩">🤩</button>
+            <button type="button" class="mood-item-btn" data-mood="😊">😊</button>
+            <button type="button" class="mood-item-btn" data-mood="🙂">🙂</button>
+            <button type="button" class="mood-item-btn" data-mood="😴">😴</button>
+            <button type="button" class="mood-item-btn" data-mood="🔥">🔥</button>
+          </div>
+          <textarea
+            class="mobile-textarea"
+            id="reflectionInput"
+            placeholder="오늘 목표를 실천하며 느낀 점이나 내일의 다짐을 기록해 보세요..."
+          ></textarea>
+          <div class="toast-msg" id="toastMsg"></div>
+        </section>
+      </div>
+
+      <!-- TAB 2: Weekly Streak Matrix (Card-based, Zero Horizontal Scroll) -->
+      <div class="tab-panel" id="tab-weekly">
+        <section class="mobile-card">
+          <div class="section-head">
+            <div class="section-title">📅 주간 요일별 체크 & 연속 기록</div>
+          </div>
+          <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 12px;">
+            가로 스크롤 없이 각 습관 카드에서 월~일 버튼을 바로 눌러 주간 달성도를 체크하세요.
+          </p>
+          <div class="weekly-cards-list" id="weeklyCardsList">
+            <!-- Dynamic Weekly Habit Cards -->
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 3: Analytics & Streak Leaderboard -->
+      <div class="tab-panel" id="tab-stats">
+        <section class="mobile-card">
+          <div class="section-head">
+            <div class="section-title">📊 이번 주 요일별 달성률 추이</div>
+          </div>
+          <div class="mobile-bar-chart" id="mobileBarChart">
+            <!-- 7 Bars -->
+          </div>
+        </section>
+
+        <section class="mobile-card">
+          <div class="section-head">
+            <div class="section-title">🔥 연속 달성(Streak) 랭킹</div>
+          </div>
+          <div id="mobileLeaderboard" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Streak Leaderboard -->
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 4: Add Goal & Backup/Restore -->
+      <div class="tab-panel" id="tab-manage">
+        <section class="mobile-card">
+          <div class="section-head">
+            <div class="section-title">➕ 새 일일 목표 추가</div>
+          </div>
+          <form class="mobile-form-stack" id="addHabitForm">
+            <div class="field-group">
+              <label for="mHabitName">습관 / 일일 목표 이름</label>
+              <input type="text" class="field-input" id="mHabitName" placeholder="예: 아침 미온수 500ml 마시기" required />
+            </div>
+            <div class="field-row-2">
+              <div class="field-group">
+                <label for="mHabitIcon">아이콘</label>
+                <select class="field-input" id="mHabitIcon">
+                  <option value="💧">💧 물</option>
+                  <option value="🏃">🏃 운동</option>
+                  <option value="📚">📚 독서</option>
+                  <option value="🧘">🧘 명상</option>
+                  <option value="💊">💊 영양제</option>
+                  <option value="💻">💻 학습</option>
+                  <option value="🥗">🥗 식단</option>
+                  <option value="✍️">✍️ 기록</option>
+                  <option value="🌅">🌅 기상</option>
+                  <option value="🎯">🎯 집중</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="mHabitCat">카테고리</label>
+                <select class="field-input" id="mHabitCat">
+                  <option value="건강">건강</option>
+                  <option value="자기계발">자기계발</option>
+                  <option value="마음챙김">마음챙김</option>
+                  <option value="생활습관">생활습관</option>
+                  <option value="생산성">생산성</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-row-2">
+              <div class="field-group">
+                <label for="mHabitTarget">일일 기준치</label>
+                <input type="text" class="field-input" id="mHabitTarget" placeholder="예: 30분 / 20쪽" required />
+              </div>
+              <div class="field-group">
+                <label for="mHabitGoal">주간 목표 횟수</label>
+                <select class="field-input" id="mHabitGoal">
+                  <option value="7">주 7일 (매일)</option>
+                  <option value="6">주 6일</option>
+                  <option value="5" selected>주 5일</option>
+                  <option value="4">주 4일</option>
+                  <option value="3">주 3일</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="primary-full-btn">새 일일 목표 등록하기</button>
+          </form>
+        </section>
+
+        <section class="mobile-card">
+          <div class="section-head">
+            <div class="section-title">🗂️ 등록된 습관 목록 관리</div>
+          </div>
+          <div id="manageHabitsList">
+            <!-- Habit delete list -->
+          </div>
+        </section>
+
+        <section class="mobile-card">
+          <div class="section-head">
+            <div class="section-title">💾 데이터 백업 및 복원</div>
+          </div>
+          <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 12px;">
+            PC와 스마트폰 간 데이터를 옮기거나 백업할 때 JSON 파일로 내보내고 불러올 수 있습니다.
+          </p>
+          <div class="field-row-2" style="margin-bottom: 10px;">
+            <button type="button" class="sm-btn" id="exportJsonBtn" style="height: 42px;">📥 백업 파일 저장</button>
+            <button type="button" class="sm-btn" id="importJsonBtn" style="height: 42px;">📤 백업 파일 불러오기</button>
+            <input type="file" id="importFileInput" accept=".json" style="display: none;" />
+          </div>
+          <button type="button" class="sm-btn" id="resetSampleBtn" style="width: 100%; height: 40px; color: var(--danger);">
+            🔄 초기 샘플 데이터로 리셋
+          </button>
+        </section>
+      </div>
+    </main>
+
+    <!-- Bottom App Navigation Bar -->
+    <nav class="bottom-nav">
+      <button type="button" class="nav-tab-btn active" data-tab="tab-today">
+        <span class="nav-ico">✅</span>
+        <span class="nav-txt">오늘 체크</span>
+      </button>
+      <button type="button" class="nav-tab-btn" data-tab="tab-weekly">
+        <span class="nav-ico">📅</span>
+        <span class="nav-txt">주간 스트릭</span>
+      </button>
+      <button type="button" class="nav-tab-btn" data-tab="tab-stats">
+        <span class="nav-ico">📊</span>
+        <span class="nav-txt">통계·랭킹</span>
+      </button>
+      <button type="button" class="nav-tab-btn" data-tab="tab-manage">
+        <span class="nav-ico">⚙️</span>
+        <span class="nav-txt">목표·백업</span>
+      </button>
+    </nav>
+  </div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = "routine_flow_dashboard_v1";
+      const DAY_NAMES = ["월", "화", "수", "목", "금", "토", "일"];
+
+      function formatDateKey(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+        const d = String(dateObj.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+
+      function parseDateKey(dateStr) {
+        const [y, m, d] = dateStr.split("-").map(Number);
+        return new Date(y, m - 1, d);
+      }
+
+      function addDays(dateObj, days) {
+        const copy = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+        copy.setDate(copy.getDate() + days);
+        return copy;
+      }
+
+      function getMonday(dateObj) {
+        const copy = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+        const day = copy.getDay();
+        const diff = day === 0 ? -6 : 1 - day;
+        copy.setDate(copy.getDate() + diff);
+        return copy;
+      }
+
+      const todayDate = new Date();
+      const todayKey = formatDateKey(todayDate);
+
+      let state = {
+        theme: "light",
+        selectedCategory: "전체",
+        selectedDateKey: todayKey,
+        currentWeekMondayKey: formatDateKey(getMonday(todayDate)),
+        habits: [],
+        logs: {},
+        reflections: {}
+      };
+
+      function buildInitialSampleData() {
+        const sampleHabits = [
+          { id: "h1", icon: "💧", name: "기상 직후 미온수 500ml", category: "건강", dailyTarget: "500ml (2컵)", weeklyGoal: 7 },
+          { id: "h2", icon: "🏃", name: "유산소 러닝 및 근력 운동", category: "건강", dailyTarget: "30분 이상", weeklyGoal: 5 },
+          { id: "h3", icon: "📚", name: "독서 및 핵심 문장 요약", category: "자기계발", dailyTarget: "25페이지", weeklyGoal: 5 },
+          { id: "h4", icon: "🧘", name: "취침 전 디지털 디톡스 & 명상", category: "마음챙김", dailyTarget: "15분", weeklyGoal: 6 },
+          { id: "h5", icon: "💻", name: "외국어 아티클 1편 필사/낭독", category: "자기계발", dailyTarget: "아티클 1편", weeklyGoal: 5 },
+          { id: "h6", icon: "✍️", name: "오전 핵심 우선순위 3가지 설정", category: "생산성", dailyTarget: "MIT 3개 작성", weeklyGoal: 5 }
+        ];
+
+        const logs = {};
+        const patterns = {
+          h1: [0, -1, -2, -3, -4, -5, -6, -7, -8, -9],
+          h2: [0, -1, -2, -3, -5, -6, -8],
+          h3: [0, -1, -2, -3, -4, -5, -7, -8],
+          h4: [-1, -2, -3, -4, -6, -7],
+          h5: [0, -1, -2, -4, -5, -7],
+          h6: [-1, -2, -3, -4, -5]
+        };
+
+        const sampleNotes = {
+          h1: "아침 공복 미온수 500ml 완료",
+          h2: "트레드밀 인터벌 35분 완료",
+          h3: "아토믹 해빗 4장 읽고 요약",
+          h5: "해외 칼럼 1편 표현 5개 정리"
+        };
+
+        Object.keys(patterns).forEach((habitId) => {
+          patterns[habitId].forEach((offset) => {
+            const dKey = formatDateKey(addDays(todayDate, offset));
+            if (!logs[dKey]) logs[dKey] = {};
+            logs[dKey][habitId] = {
+              done: true,
+              note: offset === 0 && sampleNotes[habitId] ? sampleNotes[habitId] : ""
+            };
+          });
+        });
+
+        state.habits = sampleHabits;
+        state.logs = logs;
+        state.reflections = {
+          [todayKey]: {
+            mood: "🔥",
+            text: "스마트폰에서도 한 손으로 빠르게 체크할 수 있어 루틴 관리가 훨씬 수월해졌다!"
+          }
+        };
+        state.selectedDateKey = todayKey;
+        state.currentWeekMondayKey = formatDateKey(getMonday(todayDate));
+        saveState();
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            state = Object.assign({}, state, parsed);
+            if (!state.habits || state.habits.length === 0) {
+              buildInitialSampleData();
+            }
+          } else {
+            buildInitialSampleData();
+          }
+        } catch (e) {
+          buildInitialSampleData();
+        }
+        applyTheme();
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {}
+      }
+
+      function applyTheme() {
+        document.documentElement.setAttribute("data-theme", state.theme);
+        document.getElementById("themeBtn").textContent = state.theme === "dark" ? "☀️" : "🌙";
+      }
+
+      function isHabitDone(habitId, dateKey) {
+        return Boolean(state.logs[dateKey] && state.logs[dateKey][habitId] && state.logs[dateKey][habitId].done);
+      }
+
+      function getHabitNote(habitId, dateKey) {
+        return (state.logs[dateKey] && state.logs[dateKey][habitId] && state.logs[dateKey][habitId].note) || "";
+      }
+
+      function toggleHabitDone(habitId, dateKey) {
+        if (!state.logs[dateKey]) state.logs[dateKey] = {};
+        const cur = state.logs[dateKey][habitId] || { done: false, note: "" };
+        state.logs[dateKey][habitId] = { done: !cur.done, note: cur.note || "" };
+        saveState();
+        renderAll();
+      }
+
+      function updateHabitNote(habitId, dateKey, noteText) {
+        if (!state.logs[dateKey]) state.logs[dateKey] = {};
+        const cur = state.logs[dateKey][habitId] || { done: false, note: "" };
+        state.logs[dateKey][habitId] = { done: cur.done, note: noteText };
+        saveState();
+      }
+
+      function computeStreakStats(habitId) {
+        let currentStreak = 0;
+        let checkDate = todayDate;
+
+        if (isHabitDone(habitId, formatDateKey(checkDate))) {
+          while (isHabitDone(habitId, formatDateKey(checkDate))) {
+            currentStreak++;
+            checkDate = addDays(checkDate, -1);
+          }
+        } else {
+          checkDate = addDays(todayDate, -1);
+          while (isHabitDone(habitId, formatDateKey(checkDate))) {
+            currentStreak++;
+            checkDate = addDays(checkDate, -1);
+          }
+        }
+
+        const allDates = Object.keys(state.logs)
+          .filter((dKey) => isHabitDone(habitId, dKey))
+          .sort();
+
+        let bestStreak = currentStreak;
+        let running = 0;
+        let prevDate = null;
+
+        allDates.forEach((dKey) => {
+          const curDate = parseDateKey(dKey);
+          if (!prevDate) {
+            running = 1;
+          } else {
+            const diffDays = Math.round((curDate - prevDate) / (1000 * 60 * 60 * 24));
+            if (diffDays === 1) running++;
+            else if (diffDays > 1) running = 1;
+          }
+          if (running > bestStreak) bestStreak = running;
+          prevDate = curDate;
+        });
+
+        return { currentStreak, bestStreak };
+      }
+
+      function getWeekDates() {
+        const monday = parseDateKey(state.currentWeekMondayKey);
+        const arr = [];
+        for (let i = 0; i < 7; i++) arr.push(addDays(monday, i));
+        return arr;
+      }
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function renderHeaderAndStrip(weekDates) {
+        const selObj = parseDateKey(state.selectedDateKey);
+        const korDay = ["일", "월", "화", "수", "목", "금", "토"][selObj.getDay()];
+        document.getElementById("headerDateText").textContent =
+          `${selObj.getFullYear()}년 ${selObj.getMonth() + 1}월 ${selObj.getDate()}일 (${korDay})`;
+
+        const first = weekDates[0];
+        const last = weekDates[6];
+        document.getElementById("weekRangeText").textContent =
+          `${first.getMonth() + 1}.${first.getDate()} (월) ~ ${last.getMonth() + 1}.${last.getDate()} (일)`;
+
+        const stripEl = document.getElementById("dayStripGrid");
+        stripEl.innerHTML = weekDates
+          .map((d, idx) => {
+            const dKey = formatDateKey(d);
+            const isToday = dKey === todayKey;
+            const isSelected = dKey === state.selectedDateKey;
+            const doneCount = state.habits.filter((h) => isHabitDone(h.id, dKey)).length;
+            const total = state.habits.length;
+            const stateClass = total > 0 && doneCount === total ? "all-done" : doneCount > 0 ? "has-progress" : "";
+            return `
+              <button
+                type="button"
+                class="day-pill-btn ${isToday ? "is-today" : ""} ${isSelected ? "is-selected" : ""} ${stateClass}"
+                data-pick-date="${dKey}"
+              >
+                <span class="d-name">${DAY_NAMES[idx]}</span>
+                <span class="d-num">${d.getDate()}</span>
+                <span class="d-dot"></span>
+              </button>
+            `;
+          })
+          .join("");
+
+        stripEl.querySelectorAll("[data-pick-date]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            state.selectedDateKey = btn.getAttribute("data-pick-date");
+            saveState();
+            renderAll();
+          });
+        });
+      }
+
+      function renderKPIs(weekDates) {
+        const total = state.habits.length;
+        const selDone = state.habits.filter((h) => isHabitDone(h.id, state.selectedDateKey)).length;
+        const selPct = total > 0 ? Math.round((selDone / total) * 100) : 0;
+
+        document.getElementById("kpiSelDayLabel").textContent =
+          state.selectedDateKey === todayKey ? "오늘 달성률" : `선택일(${state.selectedDateKey.slice(5)})`;
+        document.getElementById("kpiSelDayVal").textContent = `${selPct}%`;
+        document.getElementById("kpiSelDaySub").textContent = `${selDone} / ${total}개 완료`;
+        document.getElementById("kpiSelDayBar").style.width = `${selPct}%`;
+
+        const streakArr = state.habits.map((h) => ({
+          habit: h,
+          ...computeStreakStats(h.id)
+        })).sort((a, b) => b.currentStreak - a.currentStreak || b.bestStreak - a.bestStreak);
+
+        if (streakArr.length > 0) {
+          const top = streakArr[0];
+          document.getElementById("kpiStreakVal").textContent = `${top.currentStreak}일 연속`;
+          document.getElementById("kpiStreakSub").textContent = `${top.habit.icon} ${top.habit.name}`;
+          document.getElementById("kpiStreakBar").style.width = `${Math.min(100, Math.round((top.currentStreak / 14) * 100))}%`;
+        } else {
+          document.getElementById("kpiStreakVal").textContent = "0일";
+          document.getElementById("kpiStreakSub").textContent = "습관 없음";
+          document.getElementById("kpiStreakBar").style.width = "0%";
+        }
+
+        let weekChecks = 0;
+        let weekGoalSum = 0;
+        let goalMetCount = 0;
+
+        state.habits.forEach((h) => {
+          weekGoalSum += Number(h.weeklyGoal || 5);
+          let c = 0;
+          weekDates.forEach((d) => {
+            if (isHabitDone(h.id, formatDateKey(d))) {
+              c++;
+              weekChecks++;
+            }
+          });
+          if (c >= h.weeklyGoal) goalMetCount++;
+        });
+
+        const weekPct = weekGoalSum > 0 ? Math.min(100, Math.round((weekChecks / weekGoalSum) * 100)) : 0;
+        document.getElementById("kpiWeekVal").textContent = `${weekPct}%`;
+        document.getElementById("kpiWeekSub").textContent = `목표 ${weekGoalSum}회 중 ${weekChecks}회`;
+        document.getElementById("kpiWeekBar").style.width = `${weekPct}%`;
+
+        let perfectDays = 0;
+        weekDates.forEach((d) => {
+          const dKey = formatDateKey(d);
+          const c = state.habits.filter((h) => isHabitDone(h.id, dKey)).length;
+          if (total > 0 && c === total) perfectDays++;
+        });
+
+        const goalPct = total > 0 ? Math.round((goalMetCount / total) * 100) : 0;
+        document.getElementById("kpiGoalVal").textContent = `${goalMetCount}/${total}개`;
+        document.getElementById("kpiPerfectSub").textContent = `이번 주 올클리어 ${perfectDays}일`;
+        document.getElementById("kpiGoalBar").style.width = `${goalPct}%`;
+      }
+
+      function renderTodayTab() {
+        const isToday = state.selectedDateKey === todayKey;
+        document.getElementById("selectedDayBannerTitle").textContent = isToday
+          ? "오늘의 일일 목표 체크"
+          : `${state.selectedDateKey.slice(5)} 목표 체크`;
+
+        const doneCount = state.habits.filter((h) => isHabitDone(h.id, state.selectedDateKey)).length;
+        document.getElementById("selectedDayCountBadge").textContent = `${doneCount}/${state.habits.length} 완료`;
+
+        const filtered = state.habits.filter(
+          (h) => state.selectedCategory === "전체" || h.category === state.selectedCategory
+        );
+
+        const listEl = document.getElementById("todayHabitList");
+        if (filtered.length === 0) {
+          listEl.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.86rem;">해당 카테고리에 목표가 없습니다.</div>`;
+        } else {
+          listEl.innerHTML = filtered
+            .map((h) => {
+              const done = isHabitDone(h.id, state.selectedDateKey);
+              const note = getHabitNote(h.id, state.selectedDateKey);
+              const { currentStreak } = computeStreakStats(h.id);
+              return `
+                <div class="today-habit-card ${done ? "done" : ""}">
+                  <div class="today-card-main" data-card-toggle="${h.id}">
+                    <div class="big-check-circle">✓</div>
+                    <div class="today-card-info">
+                      <div class="today-card-title">
+                        <span>${h.icon}</span>
+                        <span class="today-card-title-text">${escapeHtml(h.name)}</span>
+                      </div>
+                      <div class="today-card-meta">
+                        <span class="cat-tag">${h.category}</span>
+                        <span>기준: ${escapeHtml(h.dailyTarget)}</span>
+                        <span class="streak-badge-inline">🔥 ${currentStreak}일 연속</span>
+                      </div>
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    class="today-note-input"
+                    data-note-input="${h.id}"
+                    value="${escapeHtml(note)}"
+                    placeholder="실천 수치·한줄 기록 입력 (예: 35분 완료)"
+                  />
+                </div>
+              `;
+            })
+            .join("");
+
+          listEl.querySelectorAll("[data-card-toggle]").forEach((el) => {
+            el.addEventListener("click", () => {
+              toggleHabitDone(el.getAttribute("data-card-toggle"), state.selectedDateKey);
+            });
+          });
+
+          listEl.querySelectorAll("[data-note-input]").forEach((inp) => {
+            inp.addEventListener("input", () => {
+              updateHabitNote(inp.getAttribute("data-note-input"), state.selectedDateKey, inp.value);
+              showToast("실천 메모가 자동 저장되었습니다 ✓");
+            });
+          });
+        }
+
+        const ref = state.reflections[state.selectedDateKey] || { mood: "😊", text: "" };
+        document.querySelectorAll("#moodRow .mood-item-btn").forEach((b) => {
+          b.classList.toggle("selected", b.getAttribute("data-mood") === ref.mood);
+        });
+        document.getElementById("reflectionInput").value = ref.text || "";
+      }
+
+      function renderWeeklyTab(weekDates) {
+        const listEl = document.getElementById("weeklyCardsList");
+        listEl.innerHTML = state.habits
+          .map((h) => {
+            let weekDone = 0;
+            const daysHtml = weekDates
+              .map((d, idx) => {
+                const dKey = formatDateKey(d);
+                const done = isHabitDone(h.id, dKey);
+                if (done) weekDone++;
+                const isToday = dKey === todayKey;
+                return `
+                  <button
+                    type="button"
+                    class="wk-day-btn ${done ? "done" : ""} ${isToday ? "is-today" : ""}"
+                    data-wk-habit="${h.id}"
+                    data-wk-date="${dKey}"
+                  >
+                    <span class="wd-label">${DAY_NAMES[idx]}</span>
+                    <span class="wd-mark">${done ? "✓" : d.getDate()}</span>
+                  </button>
+                `;
+              })
+              .join("");
+
+            const { currentStreak, bestStreak } = computeStreakStats(h.id);
+            const pct = Math.min(100, Math.round((weekDone / h.weeklyGoal) * 100));
+            const goalMet = weekDone >= h.weeklyGoal;
+
+            return `
+              <div class="weekly-habit-card">
+                <div class="wk-card-header">
+                  <div class="wk-title-group">
+                    <div class="wk-icon">${h.icon}</div>
+                    <div>
+                      <div class="wk-name">${escapeHtml(h.name)}</div>
+                      <div class="wk-sub">${h.category} · 일일 ${escapeHtml(h.dailyTarget)}</div>
+                    </div>
+                  </div>
+                  <div class="wk-streak-box">
+                    <div class="wk-streak-pill ${currentStreak > 0 ? "hot" : ""}">
+                      🔥 ${currentStreak}일 연속
+                    </div>
+                  </div>
+                </div>
+                <div class="wk-days-grid">
+                  ${daysHtml}
+                </div>
+                <div class="wk-footer">
+                  <span style="color: ${goalMet ? "var(--success)" : "var(--text-secondary)"};">
+                    주간 달성: ${weekDone} / ${h.weeklyGoal}일 (${pct}%) ${goalMet ? "🏅" : ""}
+                  </span>
+                  <span>최고 기록: ${bestStreak}일</span>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        listEl.querySelectorAll("[data-wk-habit]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const hId = btn.getAttribute("data-wk-habit");
+            const dKey = btn.getAttribute("data-wk-date");
+            state.selectedDateKey = dKey;
+            toggleHabitDone(hId, dKey);
+          });
+        });
+      }
+
+      function renderStatsTab(weekDates) {
+        const total = state.habits.length;
+        const chartEl = document.getElementById("mobileBarChart");
+        chartEl.innerHTML = weekDates
+          .map((d, idx) => {
+            const dKey = formatDateKey(d);
+            const c = state.habits.filter((h) => isHabitDone(h.id, dKey)).length;
+            const pct = total > 0 ? Math.round((c / total) * 100) : 0;
+            return `
+              <div class="m-bar-col">
+                <div class="m-bar-pct">${pct}%</div>
+                <div class="m-bar-track">
+                  <div class="m-bar-fill ${pct === 100 ? "full" : ""}" style="height: ${pct}%;"></div>
+                </div>
+                <div class="m-bar-day">${DAY_NAMES[idx]}</div>
+              </div>
+            `;
+          })
+          .join("");
+
+        const ranked = state.habits
+          .map((h) => ({ habit: h, ...computeStreakStats(h.id) }))
+          .sort((a, b) => b.currentStreak - a.currentStreak || b.bestStreak - a.bestStreak);
+
+        document.getElementById("mobileLeaderboard").innerHTML = ranked
+          .map(
+            (item, i) => `
+            <div class="manage-item" style="margin-bottom: 0;">
+              <div style="display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 0.88rem;">
+                <span style="color: var(--accent); font-weight: 900; width: 18px;">${i + 1}</span>
+                <span>${item.habit.icon}</span>
+                <span>${escapeHtml(item.habit.name)}</span>
+              </div>
+              <span class="streak-badge-inline">🔥 ${item.currentStreak}일 (최고 ${item.bestStreak}일)</span>
+            </div>
+          `
+          )
+          .join("");
+      }
+
+      function renderManageTab() {
+        const container = document.getElementById("manageHabitsList");
+        container.innerHTML = state.habits
+          .map(
+            (h) => `
+            <div class="manage-item">
+              <div style="display: flex; align-items: center; gap: 9px;">
+                <span style="font-size: 1.2rem;">${h.icon}</span>
+                <div>
+                  <div style="font-weight: 800; font-size: 0.88rem;">${escapeHtml(h.name)}</div>
+                  <div style="font-size: 0.74rem; color: var(--text-secondary);">${h.category} · ${escapeHtml(h.dailyTarget)} · 주 ${h.weeklyGoal}일</div>
+                </div>
+              </div>
+              <button type="button" class="del-btn" data-del-id="${h.id}">삭제</button>
+            </div>
+          `
+          )
+          .join("");
+
+        container.querySelectorAll("[data-del-id]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-del-id");
+            state.habits = state.habits.filter((h) => h.id !== id);
+            saveState();
+            renderAll();
+          });
+        });
+      }
+
+      let toastTimer = null;
+      function showToast(msg) {
+        const el = document.getElementById("toastMsg");
+        el.textContent = msg;
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          el.textContent = "";
+        }, 2000);
+      }
+
+      function renderAll() {
+        const weekDates = getWeekDates();
+        renderHeaderAndStrip(weekDates);
+        renderKPIs(weekDates);
+        renderTodayTab();
+        renderWeeklyTab(weekDates);
+        renderStatsTab(weekDates);
+        renderManageTab();
+      }
+
+      // Navigation & Controls
+      document.querySelectorAll(".bottom-nav .nav-tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".bottom-nav .nav-tab-btn").forEach((b) => b.classList.remove("active"));
+          document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+          btn.classList.add("active");
+          const targetId = btn.getAttribute("data-tab");
+          document.getElementById(targetId).classList.add("active");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+
+      document.getElementById("prevWeekBtn").addEventListener("click", () => {
+        const prev = addDays(parseDateKey(state.currentWeekMondayKey), -7);
+        state.currentWeekMondayKey = formatDateKey(prev);
+        saveState();
+        renderAll();
+      });
+
+      document.getElementById("nextWeekBtn").addEventListener("click", () => {
+        const next = addDays(parseDateKey(state.currentWeekMondayKey), 7);
+        state.currentWeekMondayKey = formatDateKey(next);
+        saveState();
+        renderAll();
+      });
+
+      document.getElementById("todayJumpBtn").addEventListener("click", () => {
+        state.currentWeekMondayKey = formatDateKey(getMonday(todayDate));
+        state.selectedDateKey = todayKey;
+        saveState();
+        renderAll();
+      });
+
+      document.getElementById("themeBtn").addEventListener("click", () => {
+        state.theme = state.theme === "dark" ? "light" : "dark";
+        applyTheme();
+        saveState();
+      });
+
+      document.querySelectorAll("#catTabsToday .cat-chip").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          document.querySelectorAll("#catTabsToday .cat-chip").forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+          state.selectedCategory = chip.getAttribute("data-cat");
+          renderTodayTab();
+        });
+      });
+
+      document.querySelectorAll("#moodRow .mood-item-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const mood = btn.getAttribute("data-mood");
+          const cur = state.reflections[state.selectedDateKey] || { mood: "😊", text: "" };
+          state.reflections[state.selectedDateKey] = { mood, text: cur.text };
+          saveState();
+          renderTodayTab();
+          showToast("컨디션이 저장되었습니다 ✓");
+        });
+      });
+
+      document.getElementById("reflectionInput").addEventListener("input", (e) => {
+        const cur = state.reflections[state.selectedDateKey] || { mood: "😊", text: "" };
+        state.reflections[state.selectedDateKey] = { mood: cur.mood, text: e.target.value };
+        saveState();
+        showToast("회고 메모가 자동 저장되었습니다 ✓");
+      });
+
+      document.getElementById("addHabitForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = document.getElementById("mHabitName").value.trim();
+        const icon = document.getElementById("mHabitIcon").value;
+        const category = document.getElementById("mHabitCat").value;
+        const dailyTarget = document.getElementById("mHabitTarget").value.trim();
+        const weeklyGoal = Number(document.getElementById("mHabitGoal").value) || 5;
+
+        if (!name || !dailyTarget) return;
+
+        state.habits.push({
+          id: "h_" + Date.now(),
+          icon,
+          name,
+          category,
+          dailyTarget,
+          weeklyGoal
+        });
+
+        document.getElementById("mHabitName").value = "";
+        document.getElementById("mHabitTarget").value = "";
+        saveState();
+        renderAll();
+
+        // Switch to Today tab after adding
+        document.querySelector('[data-tab="tab-today"]').click();
+      });
+
+      document.getElementById("exportJsonBtn").addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `routine_flow_backup_${todayKey}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById("importJsonBtn").addEventListener("click", () => {
+        document.getElementById("importFileInput").click();
+      });
+
+      document.getElementById("importFileInput").addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const imported = JSON.parse(ev.target.result);
+            if (imported && Array.isArray(imported.habits)) {
+              state = Object.assign({}, state, imported);
+              saveState();
+              applyTheme();
+              renderAll();
+              alert("백업 데이터가 성공적으로 복원되었습니다!");
+            }
+          } catch (err) {
+            alert("올바른 JSON 백업 파일이 아닙니다.");
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      document.getElementById("resetSampleBtn").addEventListener("click", () => {
+        buildInitialSampleData();
+        renderAll();
+      });
+
+      loadState();
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
